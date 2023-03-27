@@ -125,6 +125,7 @@ export default {
     sur_deconnect: 'Voulez-vous déconnecter de Sedami ?',
     start_download: 'début Télechargement',
     confirm_download: 'Taille du Télechargemen : ',
+    confirm_password: 'Confirmez le mot de passe',
     empty_notes: 'Aucune notes',
     likes_courses: 'Listes de Favoris !',
     explore: 'Explorer',

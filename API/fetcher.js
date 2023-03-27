@@ -2,6 +2,7 @@ import NetInfo from '@react-native-community/netinfo';
 import Globals from '../Ressources/Globals';
 import Neter from '../Ressources/Neter';
 import Storer from './storer';
+import axios from 'axios';
 const baseUrl = Neter.uri1;
 let Fetcher = {
   FetchInternet: function () {
@@ -15,7 +16,7 @@ let Fetcher = {
     });
   },
   AuthSignup: async function (setdada) {
-    let url = baseUrl + '/api/users';
+    let url = baseUrl + '/users';
     let res = await fetch(url, {
       method: 'post',
       body: JSON.stringify(setdada),
@@ -25,16 +26,25 @@ let Fetcher = {
     });
     return await res.json();
   },
-  AuthSignin: async function (setdada) {
-    let url = baseUrl + '/api/users/login';
+  AuthSignout: async function (setdada) {
+    let url = baseUrl + '/users/sign_out';
     let res = await fetch(url, {
-      method: 'POST',
-      body: setdada,
+      method: 'DELETE',
+      body: JSON.stringify(setdada),
       headers: {
         'Content-Type': 'application/json',
       },
     });
     return await res.json();
+  },
+  AuthSignin: async function (setdada) {
+    let url = baseUrl + '/users/sign_in';
+    let res = await axios.post(url, setdada, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res;
   },
   GetUserData: async function (setdada) {
     let url = baseUrl + '/api/users/login';
@@ -48,15 +58,9 @@ let Fetcher = {
     return await res.json();
   },
   GetSection: async function (setdada) {
-    let url = baseUrl + '/api/users/login/';
-    let res = await fetch(url, {
-      method: 'POST',
-      body: setdada,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return await res.json();
+    let url = baseUrl + '/clips';
+    let res = await axios.get(url);
+    return res;
   },
   GetChallenges: async function (setdada) {
     let url = baseUrl + '/api/challenge/results';

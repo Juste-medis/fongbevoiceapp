@@ -39,6 +39,7 @@ if (mobile_360_750) {
     },
     loginButtonLabel: {
       fontSize: 22,
+      color: '#ffffff',
     },
     navButtonText: {
       fontSize: 16,
@@ -126,7 +127,9 @@ if (mobile_360_750) {
       marginHorizontal: 12,
     },
     media_container: {flexDirection: 'row', margin: 50},
-    wrapper: {},
+    wrapper: {
+      marginTop: 20,
+    },
     slide1: {
       flex: 1,
     },

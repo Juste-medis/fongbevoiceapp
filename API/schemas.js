@@ -3,24 +3,24 @@ import Globals from '../Ressources/Globals';
 import Global from '../Ressources/Globals';
 
 export const Schemasignin = yup.object().shape({
-  phone: yup
+  email: yup
     .string()
     .email(Global.STRINGS.invalid_mail)
     .min(8, Global.STRINGS.small_phone),
-  code: yup.string().min(5, Global.STRINGS.small_code),
+  password: yup.string().min(5, Global.STRINGS.small_code),
   language: yup.string(),
 });
 
 export const Schemasignup = yup.object().shape({
-  phone: yup.string().min(8, Global.STRINGS.small_phone),
-  code: yup
+  email: yup.string().min(8, Global.STRINGS.small_phone),
+  password: yup
     .string()
-    .email(Global.STRINGS.invalid_mail)
     .required(Globals.STRINGS.required_field)
     .min(5, Global.STRINGS.small_code),
+  fullname: yup.string().required(Globals.STRINGS.required_field),
   confirmcode: yup
     .string()
-    .oneOf([yup.ref('code'), null], Globals.STRINGS.passNotMatch)
+    .oneOf([yup.ref('password'), null], Globals.STRINGS.passNotMatch)
     .required(Globals.STRINGS.required_field),
   language: yup.string(),
 });

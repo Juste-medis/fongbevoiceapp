@@ -43,8 +43,8 @@ const SCHEMAS = {
 };
 
 export const AppLanguages = [
-  { label: 'Fongbe', value: 'fn' },
-  { label: 'Français', value: 'fr' },
+  {label: 'Masculin', value: 'M'},
+  {label: 'Feminin', value: 'F'},
 ];
 
 export default SCHEMAS;

@@ -1,23 +1,18 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import Globals from '../../Ressources/Globals';
 import {styleDashBoard as styles} from '../../Ressources/Styles';
-import Fetcher from '../../API/fakeApi';
+import Fetcher from '../../API/fetcher';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Storer from '../../API/storer';
 import RNReastart from 'react-native-restart';
-import {AppLanguages} from '../../Helpers/Shemas';
-import {Picker} from '@react-native-picker/picker';
 import {Modal, Portal, Provider} from 'react-native-paper';
 
 export default function Dasboard({navigation}) {
-  const pickerRef = useRef();
-  const [selectedLanguage, setSelectedLanguage] = useState(
-    Globals.PROFIL_INFO.user.language,
-  );
+  const [selectedLanguage] = useState(Globals.PROFIL_INFO.language || 'fr');
   const [visible, setVisible] = React.useState(false);
 
   const showModal = () => setVisible(true);
@@ -25,18 +20,18 @@ export default function Dasboard({navigation}) {
   const containerStyle = {backgroundColor: 'white', padding: 20};
 
   const [dataprop, setdataprop] = React.useState({
-    recordings: Globals.PROFIL_INFO.user.recordings,
-    validated: Globals.PROFIL_INFO.user.validated,
-    note: Globals.PROFIL_INFO.user.note,
-    gain: Globals.PROFIL_INFO.user.gain,
-    username: Globals.PROFIL_INFO.user.username,
+    recordings: Globals.PROFIL_INFO.clips_created || 3,
+    validated: Globals.PROFIL_INFO.clips_validated || 3,
+    note: Globals.PROFIL_INFO.note || 3,
+    email: Globals.PROFIL_INFO.email || '-',
+    fullname: Globals.PROFIL_INFO.fullname || '-',
   });
   const [spinner, setspinner] = React.useState(false);
   function err_err(err) {
     setspinner(false);
     Toast.show({
       type: 'error',
-      text1: 'Eureur',
+      text1: 'Ereur',
       text2:
         err.name === 'TypeError'
           ? Globals.STRINGS.no_internet
@@ -44,7 +39,7 @@ export default function Dasboard({navigation}) {
     });
   }
   useEffect(() => {
-    load_init();
+    // load_init();
     return () => {};
   }, []);
   const load_init = () => {
@@ -52,14 +47,11 @@ export default function Dasboard({navigation}) {
     Fetcher.GetUserData(
       JSON.stringify({
         user: {
-          phone: Globals.PROFIL_INFO.phone,
-          code: Globals.PROFIL_INFO.code,
           language: selectedLanguage,
         },
       }),
     )
       .then(res => {
-        console.log(res);
         setspinner(false);
         if (res.errors) {
           err_err(
@@ -76,10 +68,30 @@ export default function Dasboard({navigation}) {
         err_err(err);
       });
   };
-  function handleLanguageChange(itemValue, index) {
-    load_init();
-    setSelectedLanguage(itemValue);
-  }
+
+  const deconnectUser = () => {
+    setVisible(false);
+    setspinner(true);
+    Fetcher.AuthSignout(
+      JSON.stringify({
+        user: {
+          phone: Globals.PROFIL_INFO.phone,
+          code: Globals.PROFIL_INFO.code,
+          language: selectedLanguage,
+        },
+      }),
+    )
+      .then(res => {
+        setspinner(false);
+        Storer.removeData();
+        RNReastart.Restart();
+      })
+      .catch(err => {
+        setspinner(false);
+        err_err(err);
+      });
+  };
+
   const MiddleFielder = meta => {
     return (
       <View style={styles.middle_fields_container}>
@@ -117,10 +129,7 @@ export default function Dasboard({navigation}) {
                 Annuler
               </Text>
               <Text
-                onPress={() => {
-                  Storer.removeData();
-                  RNReastart.Restart();
-                }}
+                onPress={deconnectUser}
                 style={{
                   color: Globals.COLORS.primary,
                   fontWeight: 'bold',
@@ -159,7 +168,7 @@ export default function Dasboard({navigation}) {
               }}
             />
 
-            <Text style={styles.autor_name}>{dataprop.username}</Text>
+            <Text style={styles.autor_name}>{dataprop.fullname}</Text>
           </View>
           <View style={styles.middle_container}>
             {MiddleFielder({
@@ -178,61 +187,23 @@ export default function Dasboard({navigation}) {
 
           <View
             style={{
-              marginBottom: 20,
+              marginBottom: 40,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
               width: '100%',
             }}>
-            <TouchableOpacity
-              onPress={e => {
-                pickerRef.current.focus();
-              }}
-              activeOpacity={1}
-              style={{}}>
+            <TouchableOpacity onPress={e => {}} activeOpacity={1} style={{}}>
               <Text
                 style={{
                   color: 'black',
                   fontSize: 18,
                   fontWeight: '600',
                 }}>
-                {selectedLanguage}{' '}
-                <Icon
-                  style={{marginLeft: 10}}
-                  name="chevron-down"
-                  size={20}
-                  color="black"
-                />
+                {dataprop.email}
               </Text>
             </TouchableOpacity>
-            <Picker
-              ref={pickerRef}
-              selectedValue={selectedLanguage}
-              mode="dropdown"
-              dropdownIconRippleColor="white"
-              style={{
-                color: 'black',
-                fontWeight: 'bold',
-                height: 0,
-                width: 0,
-              }}
-              itemStyle={{backgroundColor: 'white', color: 'black'}}
-              onValueChange={(itemValue, itemIndex) => {
-                handleLanguageChange(itemValue, itemIndex);
-              }}>
-              {AppLanguages.map(mes => (
-                <Picker.Item
-                  style={{
-                    backgroundColor: 'white',
-                    color: 'black',
-                    fontWeight: 'bold',
-                  }}
-                  label={mes.label}
-                  value={mes.value}
-                />
-              ))}
-            </Picker>
           </View>
         </View>
 

@@ -4,7 +4,7 @@ import {ScrollView, Text, View} from 'react-native';
 import {styleRecorder as styles} from '../../Ressources/Styles';
 import Toast from 'react-native-toast-message';
 import Globals from '../../Ressources/Globals';
-import Fetcher from '../../API/fakeApi';
+import Fetcher from '../../API/fetcher';
 import AudioRecorde from '../../components/AudioRecorder';
 
 import * as RNFS from 'react-native-fs';
@@ -14,9 +14,7 @@ export default function Recorder({navigation}) {
   const [spinner, setspinner] = React.useState(false);
 
   const [sectiondata, setsectiondata] = React.useState({
-    language: Globals.PROFIL_INFO.user.language,
-    sentences: Globals.PROFIL_INFO.user.sentences,
-    idsentences: Globals.PROFIL_INFO.user.idsentences[0],
+    sentences: [],
   });
   useEffect(() => {
     load_init();
@@ -25,16 +23,10 @@ export default function Recorder({navigation}) {
 
   const load_init = () => {
     setspinner(true);
-    Fetcher.GetSection(
-      JSON.stringify({
-        user: {
-          phone: Globals.PROFIL_INFO.phone,
-          code: Globals.PROFIL_INFO.code,
-          language: Globals.PROFIL_INFO.user.language,
-        },
-      }),
-    )
+    Fetcher.GetSection()
       .then(res => {
+        res = res.data;
+        console.log(res);
         setspinner(false);
         if (res.errors) {
           err_err(
@@ -46,15 +38,14 @@ export default function Recorder({navigation}) {
           setsectiondata({
             ...sectiondata,
             ...{
-              language: res.user.language,
-              sentences: res.user.sentences,
-              idsentences: res.user.idsentences[0],
+              sentences: res,
             },
           });
         }
         setspinner(false);
       })
       .catch(err => {
+        console.log(err);
         err_err(err);
       });
   };
@@ -74,10 +65,8 @@ export default function Recorder({navigation}) {
         },
         'test.wav',
       );
-      bodyFormData.append('idsentences', sectiondata.idsentences);
       bodyFormData.append('token', Globals.PROFIL_INFO.user.token);
       bodyFormData.append('phone', Globals.PROFIL_INFO.phone);
-      bodyFormData.append('language', Globals.PROFIL_INFO.user.language);
       bodyFormData.append('profile', Globals.PROFIL_INFO.user.profile);
 
       var http = new XMLHttpRequest();
@@ -97,15 +86,13 @@ export default function Recorder({navigation}) {
             code: Globals.PROFIL_INFO.code,
           };
           //------------------------------------------
-          Storer.storeData('@ProfilInfo', newpro);
-          Globals.PROFIL_INFO = newpro;
+          // Storer.storeData('@ProfilInfo', newpro);
+          // Globals.PROFIL_INFO = newpro;
           //------------------------------------------
           setsectiondata({
             ...sectiondata,
             ...{
-              language: response.user.language,
               sentences: response.user.sentences,
-              idsentences: response.user.idsentences[0],
             },
           });
         }
@@ -152,7 +139,9 @@ export default function Recorder({navigation}) {
             Traduire le texte suivant en{' '}
             <Text style={styles.translate_lang}>{sectiondata.language}</Text>:
           </Text>
-          <Text style={styles.translate_value}>{sectiondata.sentences[0]}</Text>
+          <Text style={styles.translate_value}>
+            {sectiondata.sentences?.[0]?.content}
+          </Text>
         </View>
         <AudioRecorde
           spinner={spinner}
