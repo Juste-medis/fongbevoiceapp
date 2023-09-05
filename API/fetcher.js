@@ -46,6 +46,19 @@ let Fetcher = {
     });
     return res;
   },
+  AuthSigninF: async function (setdada) {
+    let url = baseUrl + '/users/sign_in';
+    console.log(url);
+    let res = await fetch(url, {
+      method: 'post',
+      body: JSON.stringify(setdada),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log(res.text());
+    return await res.json();
+  },
   GetUserData: async function (setdada) {
     let url = baseUrl + '/api/users/login';
     let res = await fetch(url, {
@@ -61,6 +74,18 @@ let Fetcher = {
     let url = baseUrl + '/clips';
     let res = await axios.get(url);
     return res;
+  },
+  GetSectionF: async function (setdada) {
+    let url = baseUrl + '/clips';
+    let res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log(res.status);
+    return await res.text();
   },
   GetChallenges: async function (setdada) {
     let url = baseUrl + '/api/challenge/results';

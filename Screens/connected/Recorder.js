@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect} from 'react';
-import {ScrollView, Text, View} from 'react-native';
+import {ActivityIndicator, ScrollView, Text, View} from 'react-native';
 import {styleRecorder as styles} from '../../Ressources/Styles';
 import Toast from 'react-native-toast-message';
 import Globals from '../../Ressources/Globals';
@@ -9,6 +9,7 @@ import AudioRecorde from '../../components/AudioRecorder';
 
 import * as RNFS from 'react-native-fs';
 import Storer from '../../API/storer';
+import axios from 'axios';
 
 export default function Recorder({navigation}) {
   const [spinner, setspinner] = React.useState(false);
@@ -23,7 +24,7 @@ export default function Recorder({navigation}) {
 
   const load_init = () => {
     setspinner(true);
-    Fetcher.GetSection()
+    Fetcher.GetSectionF()
       .then(res => {
         res = res.data;
         console.log(res);
@@ -38,7 +39,7 @@ export default function Recorder({navigation}) {
           setsectiondata({
             ...sectiondata,
             ...{
-              sentences: res,
+              sentences: [res],
             },
           });
         }
@@ -56,57 +57,86 @@ export default function Recorder({navigation}) {
     } else {
       setspinner(true);
       var bodyFormData = new FormData();
-      bodyFormData.append(
-        'audio',
-        {
-          uri: pathi,
-          name: 'audio.wav',
-          type: 'audio/wav',
+      bodyFormData.append({
+        clip: {
+          audio: {
+            uri: pathi,
+            name: 'audio.wav',
+            type: 'audio/wav',
+          },
+          sentence_id: sectiondata.sentences?.[0]?.id,
         },
-        'test.wav',
-      );
-      bodyFormData.append('token', Globals.PROFIL_INFO.user.token);
-      bodyFormData.append('phone', Globals.PROFIL_INFO.phone);
-      bodyFormData.append('profile', Globals.PROFIL_INFO.user.profile);
+      });
+      let user = await Storer.getData('@ProfilInfo');
+      console.log(user);
+      const user_id = user.id;
 
-      var http = new XMLHttpRequest();
-      http.open(
-        'POST',
-        'http://217.160.170.119:8000/api/speech/uploadfile/',
-        true,
-      );
-      http.setRequestHeader('Content-type', 'multipart/form-data');
-      http.onreadystatechange = function () {
-        if (http.readyState === 4 && http.status === 200) {
-          RNFS.unlink(pathi);
-          let response = JSON.parse(http.responseText);
-          let newpro = {
-            ...response,
-            phone: Globals.PROFIL_INFO.phone,
-            code: Globals.PROFIL_INFO.code,
-          };
-          //------------------------------------------
-          // Storer.storeData('@ProfilInfo', newpro);
-          // Globals.PROFIL_INFO = newpro;
-          //------------------------------------------
-          setsectiondata({
-            ...sectiondata,
-            ...{
-              sentences: response.user.sentences,
-            },
-          });
-        }
-        setspinner(false);
-      };
-      http.onerror = function () {
-        console.log(http.responseText);
-        if (http.responseText.includes('Failed to connect')) {
-          err_err(Globals.STRINGS.no_internet);
-        } else {
-          err_err(Globals.STRINGS.Ocurred_error);
-        }
-      };
-      http.send(bodyFormData);
+      const formData = new FormData();
+
+      formData.append('clip[audio]', {
+        uri: pathi,
+        name: 'audio.wav',
+        type: 'audio/wav',
+      });
+      formData.append('clip[sentence_id]', sectiondata.sentences?.[0]?.id);
+      formData.append('clip[user_id]', user_id.value);
+
+      // https://fongbevi.com/clips/new
+
+      fetch('https://fongbevi.com/api/clips', {
+        method: 'POST',
+        body: formData,
+      })
+        .then(response => {
+          console.log('File saved successfully!');
+        })
+        .catch(error => {
+          console.error('Error saving file:', error);
+        });
+
+      // bodyFormData.append('token', token);
+      // axios
+      //   .post('api/clips', bodyFormData)
+      //   .then(response => {
+      //     console.log(response);
+      //   })
+      //   .catch(e => {
+      //     console.log (  e);
+      //   });
+
+      // var http = new XMLHttpRequest();
+
+      // http.open('POST', 'https://fongbevi.com/api/clips', true);
+      // http.setRequestHeader('Content-type', 'multipart/form-data');
+      // http.setRequestHeader('Authorization', `Bearer ${token}`);
+      // http.onreadystatechange = function () {
+      //   console.log(JSON.stringify(http));
+
+      //   if (http.readyState === 4 && http.status === 200) {
+      //     RNFS.unlink(pathi);
+      //     let response = JSON.parse(http.responseText);
+      //     //console.log(response);
+      //     let newpro = {
+      //       ...response,
+      //       phone: Globals.PROFIL_INFO.phone,
+      //       code: Globals.PROFIL_INFO.code,
+      //     };
+      //     //------------------------------------------
+      //     // Storer.storeData('@ProfilInfo', newpro);
+      //     // Globals.PROFIL_INFO = newpro;
+      //     //------------------------------------------
+      //   }
+      //   setspinner(false);
+      // };
+      // http.onerror = function () {
+      //   console.log(http.responseText);
+      //   if (http.responseText.includes('Failed to connect')) {
+      //     err_err(Globals.STRINGS.no_internet);
+      //   } else {
+      //     err_err(Globals.STRINGS.Ocurred_error);
+      //   }
+      // };
+      // http.send(bodyFormData);
     }
   };
   function err_err(err) {
@@ -135,13 +165,18 @@ export default function Recorder({navigation}) {
       <Toast position="top" topOffset={1} />
       <View style={styles.middle_heberger}>
         <View style={styles.middle_container}>
-          <Text style={styles.translate_text}>
-            Traduire le texte suivant en{' '}
-            <Text style={styles.translate_lang}>{sectiondata.language}</Text>:
-          </Text>
-          <Text style={styles.translate_value}>
-            {sectiondata.sentences?.[0]?.content}
-          </Text>
+          <Text style={styles.translate_text}>Traduire le texte suivant</Text>
+          {spinner ? (
+            <ActivityIndicator
+              style={{marginTop: 30}}
+              size="large"
+              color="#000"
+            />
+          ) : (
+            <Text style={styles.translate_value}>
+              {sectiondata.sentences?.[0]?.content}
+            </Text>
+          )}
         </View>
         <AudioRecorde
           spinner={spinner}

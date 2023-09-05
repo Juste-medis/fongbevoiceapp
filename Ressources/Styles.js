@@ -230,14 +230,14 @@ if (mobile_360_750) {
     },
     bottom_container: {
       textAlign: 'center',
-      marginTop: 120,
+      marginTop: 4,
       display: 'flex',
-      flexDirection: 'row',
+      flexDirection: 'column',
       justifyContent: 'space-between',
       alignItems: 'center',
     },
     image: {
-      borderRadius: 50,
+      borderRadius: 60,
       height: 100,
       width: '30%',
       padding: 4,
@@ -249,7 +249,7 @@ if (mobile_360_750) {
       padding: 4,
     },
     middle_heberger: {
-      paddingTop: 50,
+      paddingTop: 150,
     },
     middle_container: {
       display: 'flex',
@@ -267,7 +267,7 @@ if (mobile_360_750) {
       fontWeight: 'normal',
       textAlignVertical: 'center',
       fontStyle: 'italic',
-      color: Globals.COLORS.arsenic,
+      color: Globals.COLORS.grey,
       fontSize: 15,
     },
     translate_value: {
@@ -276,7 +276,7 @@ if (mobile_360_750) {
       fontSize: 20,
       paddingBottom: 20,
       textAlign: 'center',
-      paddingTop: 8,
+      paddingTop: 20,
     },
     translate_lang: {
       fontWeight: 'bold',

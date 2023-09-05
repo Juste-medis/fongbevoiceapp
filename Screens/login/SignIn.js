@@ -98,7 +98,6 @@ export default function SignIn({navigation}) {
           },
         })
           .then(res => {
-            console.log('rr', res);
             setspinner(false);
             if (res.errors) {
               let keyserr = Object.keys(res.errors);
@@ -128,7 +127,7 @@ export default function SignIn({navigation}) {
             err_err(err);
           });
       } else {
-        Fetcher.AuthSignin(
+        Fetcher.AuthSigninF(
           JSON.stringify({
             user: {
               email,
@@ -138,6 +137,7 @@ export default function SignIn({navigation}) {
           }),
         )
           .then(res => {
+            console.log(res);
             setspinner(false);
             let token = res.headers.getAuthorization().split(' ')[1];
             res = res.data;

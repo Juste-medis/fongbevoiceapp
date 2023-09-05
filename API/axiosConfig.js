@@ -12,7 +12,7 @@ export default function setupAxios(axios, store) {
           config.headers.Authorization = `Bearer ${token}`;
         }
       }
-
+      console.log(config);
       return config;
     },
     err => Promise.reject(err),

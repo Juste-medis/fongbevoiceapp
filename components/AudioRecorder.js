@@ -199,7 +199,7 @@ class AudioRecorde extends Component {
 
         <View style={styles.bottom_container}>
           <Button
-            mode="outlined"
+            mode="text"
             theme={{colors: {primary: '#fd7e14'}}}
             onPress={() => {
               if (this.state.recording) {
@@ -212,7 +212,7 @@ class AudioRecorde extends Component {
           </Button>
           {this.state.recording && (
             <Button
-              mode="outlined"
+              mode="text"
               theme={{colors: {primary: '#000'}}}
               onPress={() => {
                 this.state.paused ? this._resume() : this._pause();
@@ -234,8 +234,8 @@ class AudioRecorde extends Component {
               marginTop: 10,
             }}>
             <Button
-              mode="outlined"
-              theme={{colors: {primary: '#000'}}}
+              mode="text"
+              theme={{colors: {primary: '#fff'}}}
               onPress={() => {
                 this._play();
               }}>
